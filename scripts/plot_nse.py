@@ -70,7 +70,7 @@ def main():
 
     abundances = load_abundances("output.txt")
     abundances["N"] = abundances["A"] - abundances["Z"]
-    abundances = abundances[abundances["Abundance"] > 0]
+    abundances = abundances[abundances["Abundance"] > 1e-15]
     abundances["Abundance"] = np.log10(abundances["Abundance"])
 
     stable = pd.read_csv("data/stable_isotopes.csv")

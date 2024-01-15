@@ -16,7 +16,7 @@ void write_output(std::string outfile, double *x, network_data *nd) {
   fprintf(fd, "Nucleide, A, Z, Abundance\n");
 
   for (int i = 0; i < nd->nuc_count; i++) {
-    fprintf(fd, "%s, %d, %d, %f\n", nd->nucdata[i].name, nd->nucdata[i].na,
+    fprintf(fd, "%s, %d, %d, %e\n", nd->nucdata[i].name, nd->nucdata[i].na,
             nd->nucdata[i].nz, x[i]);
   }
 
