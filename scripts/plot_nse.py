@@ -1,3 +1,5 @@
+import argparse
+import matplotlib
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -64,11 +66,18 @@ def plot_magic_numbers(ax):
     ax.axvline(50.5, color="k", linestyle=":", alpha=0.5)
 
 
-def main():
-    species = load_species("data/species.txt")
+def main(
+    figname,
+    species_file="data/species.txt",
+    abundance_file="output.txt",
+    title=None,
+):
+    matplotlib.rcParams.update({"font.size": 16})
+
+    species = load_species(species_file)
     species["N"] = species["A"] - species["Z"]
 
-    abundances = load_abundances("output.txt")
+    abundances = load_abundances(abundance_file)
     abundances["N"] = abundances["A"] - abundances["Z"]
     abundances = abundances[abundances["Abundance"] > 1e-15]
     abundances["Abundance"] = np.log10(abundances["Abundance"])
@@ -106,7 +115,7 @@ def main():
         s=100,
         c=abundances["Abundance"],
         marker="s",
-        cmap="viridis",
+        cmap="jet",
         label="NSE abundances",
     )
 
@@ -117,14 +126,56 @@ def main():
 
     ax.set_xlabel("Number of Neutrons")
     ax.set_ylabel("Number of Protons")
+    if title is not None:
+        ax.set_title(title)
+
+    ax.set_xlim(-1, 60)
+    ax.set_ylim(-1, 60)
     plt.legend()
 
     plt.tight_layout()
 
-    fig.savefig("test.png", bbox_inches="tight")
+    fig.savefig(figname, bbox_inches="tight")
 
     return
 
 
+def cli():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        "figname",
+        type=str,
+        help="Figure name",
+    )
+    parser.add_argument(
+        "-s",
+        "--species_file",
+        type=str,
+        default="data/species.txt",
+        help="Species file",
+    )
+    parser.add_argument(
+        "-a",
+        "--abundance_file",
+        type=str,
+        default="output.txt",
+        help="Output file",
+    )
+    parser.add_argument(
+        "-t",
+        "--title",
+        type=str,
+    )
+
+    args = parser.parse_args()
+    main(
+        figname=args.figname,
+        species_file=args.species_file,
+        abundance_file=args.abundance_file,
+        title=args.title,
+    )
+
+
 if __name__ == "__main__":
-    main()
+    cli()

@@ -8,8 +8,8 @@
 #include "output.hpp"
 
 int main(int argc, char *argv[]) {
-  if (argc != 5) {
-    printf("Usage: %s <temp> <rho> <ye> <outfile>\n", argv[0]);
+  if (argc != 6) {
+    printf("Usage: %s <temp> <rho> <ye> <outfile> <species>\n", argv[0]);
     return 1;
   }
 
@@ -17,11 +17,12 @@ int main(int argc, char *argv[]) {
   double rho = std::stod(argv[2]);
   double ye = std::stod(argv[3]);
   std::string outfile = argv[4];
+  std::string species = argv[5];
 
   network_data nd;
   network_workspace nw;
 
-  load_data(&nd);
+  load_data(&nd, species);
   nw.gg = (network_var *)malloc(nd.nuc_count * sizeof(network_var));
   nw.prefac = (double *)malloc(nd.nuc_count * sizeof(double));
 

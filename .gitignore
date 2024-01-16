@@ -13,3 +13,5 @@ __pycache__
 # Specific ignore rules
 build
 .cache
+*.txt
+*.png

@@ -9,14 +9,13 @@
 static const double conv =
     1.602177e-12 * 1.0e3 * 6.0221367e23; /* eV2erg * 1.0e3 [keV] * avogadro */
 
-void load_data(network_data *nd) {
+void load_data(network_data *nd, std::string species) {
   printf("Loading data\n");
 
-  std::string speciesfile = "data/species.txt";
   std::string massfile = "data/mass.txt";
   std::string partfile = "data/part.txt";
 
-  read_species(speciesfile, nd);
+  read_species(species, nd);
   printf("Found %d species\n", nd->nuc_count);
 
   read_mass(massfile, nd);
@@ -56,7 +55,6 @@ void read_species(std::string speciesfile, network_data *nd) {
 void read_mass(std::string massfile, network_data *nd) {
   FILE *fd;
   char cdummy[200];
-  char *masses;
   int nminz, nn, nz, na;
   double exm, q;
 
@@ -66,7 +64,11 @@ void read_mass(std::string massfile, network_data *nd) {
     exit(1);
   }
 
-  masses = (char *)malloc(nd->nuc_count * sizeof(char));
+  int *masses;
+  masses = (int *)malloc(nd->nuc_count * sizeof(int));
+  for (int i = 0; i < nd->nuc_count; i++) {
+    masses[i] = 0;
+  }
 
   /* skip 39 lines */
   for (int i = 0; i < 39; i++) {
@@ -96,11 +98,11 @@ void read_mass(std::string massfile, network_data *nd) {
 
   fclose(fd);
 
-  char missing = 0;
+  int missing = 0;
   for (int i = 0; i < nd->nuc_count; i++) {
-    if (!masses[i]) {
+    if (masses[i] == 0) {
       printf("Nucleus %s missing in mass file.\n", nd->nucdata[i].name);
-      missing = 1;
+      missing += 1;
     }
 
     nd->nucdata[i].m =
@@ -109,7 +111,7 @@ void read_mass(std::string massfile, network_data *nd) {
             (GSL_CONST_CGS_SPEED_OF_LIGHT * GSL_CONST_CGS_SPEED_OF_LIGHT);
   }
 
-  if (missing) {
+  if (missing > 0) {
     exit(1);
   }
 
@@ -120,7 +122,6 @@ void read_part(std::string partfile, network_data *nd) {
   FILE *fd;
   char cdummy[200];
   double spin;
-  char *spins;
   int nz, na, found;
 
   printf("Reading partition function\n");
@@ -130,7 +131,11 @@ void read_part(std::string partfile, network_data *nd) {
     exit(1);
   }
 
-  spins = (char *)malloc(nd->nuc_count * sizeof(char));
+  int *spins;
+  spins = (int *)malloc(nd->nuc_count * sizeof(int));
+  for (int i = 0; i < nd->nuc_count; i++) {
+    spins[i] = 0;
+  }
 
   /* default value for the partition function is 1.0 => log(part) = 0.0 */
   for (int i = 0; i < nd->nuc_count; i++) {
@@ -192,7 +197,7 @@ void read_part(std::string partfile, network_data *nd) {
   fclose(fd);
 
   for (int i = 0; i < nd->nuc_count; i++) {
-    if (!spins[i]) {
+    if (spins[i] == 0) {
       printf("There are no partition function and spin data for nucleus %s. "
              "Assuming spin 0 and constant partition function of 1.\n",
              nd->nucdata[i].name);
